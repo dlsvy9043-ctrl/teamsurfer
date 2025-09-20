@@ -1,45 +1,54 @@
 import express from "express";
 import puppeteer from "puppeteer";
-import cors from "cors";
 
 const app = express();
-app.use(cors());
+const PORT = process.env.PORT || 3000;
 
 app.get("/rank", async (req, res) => {
   const { store, keyword } = req.query;
+
   if (!store || !keyword) {
-    return res.status(400).json({ error: "store, keyword 파라미터 필요" });
+    return res.status(400).json({ error: "store와 keyword를 입력하세요." });
   }
 
   try {
     const browser = await puppeteer.launch({
       headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
     const page = await browser.newPage();
-    const url = `https://search.naver.com/search.naver?query=${encodeURIComponent(keyword)}`;
-    await page.goto(url, { waitUntil: "domcontentloaded" });
 
-    const results = await page.evaluate(() => {
-      const items = [];
-      document.querySelectorAll(".place_section_content .place_bluelink").forEach((el, idx) => {
-        items.push({ rank: idx + 1, name: el.textContent.trim() });
-      });
-      return items;
-    });
+    const searchUrl = `https://search.naver.com/search.naver?where=nexearch&sm=top_hty&ie=utf8&query=${encodeURIComponent(
+      keyword
+    )}`;
+    await page.goto(searchUrl, { waitUntil: "domcontentloaded" });
+
+    // 광고 제외한 플레이스 정보 가져오기
+    const places = await page.$$eval(".place_app_common .place_bluelink", els =>
+      els.map(el => ({
+        text: el.textContent.trim(),
+      }))
+    );
 
     await browser.close();
 
-    const match = results.find(r => r.name.includes(store));
-    if (match) {
-      res.json({ store, keyword, rank: match.rank });
+    // 매장명 포함 여부로 순위 검색 (띄어쓰기 무시)
+    const normalizedStore = store.replace(/\s+/g, "");
+    const index = places.findIndex(place =>
+      place.text.replace(/\s+/g, "").includes(normalizedStore)
+    );
+
+    if (index !== -1) {
+      return res.json({ store, keyword, rank: index + 1 });
     } else {
-      res.json({ store, keyword, rank: null });
+      return res.json({ store, keyword, rank: null });
     }
-  } catch (e) {
-    res.status(500).json({ error: "크롤링 실패", details: e.message });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "크롤링 실패", details: error.message });
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
+});
