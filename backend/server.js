@@ -1,8 +1,12 @@
 import express from "express";
 import puppeteer from "puppeteer";
+import cors from "cors";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ✅ CORS 허용 (Netlify 프론트엔드에서 요청 가능하도록)
+app.use(cors());
 
 app.get("/rank", async (req, res) => {
   const { store, keyword } = req.query;
@@ -31,7 +35,7 @@ app.get("/rank", async (req, res) => {
 
     await page.goto(searchUrl, { waitUntil: "domcontentloaded" });
 
-    // 플레이스 영역에서 매장명 가져오기
+    // ✅ 네이버 플레이스 영역에서 매장명 가져오기
     const places = await page.$$eval(
       ".place_section_content .place_bluelink",
       (elements) => elements.map((el) => el.textContent.trim())
@@ -39,6 +43,7 @@ app.get("/rank", async (req, res) => {
 
     await browser.close();
 
+    // ✅ 순위 계산 (index는 0부터 시작 → +1)
     const rank = places.findIndex((name) => name.includes(store)) + 1;
 
     if (rank > 0) {
