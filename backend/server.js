@@ -1,8 +1,11 @@
 import express from "express";
 import puppeteer from "puppeteer";
+import cors from "cors";   // ✅ 추가
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(cors());   // ✅ 모든 도메인 허용 (Netlify → Vercel 통신 가능)
 
 app.get("/rank", async (req, res) => {
   const { store, keyword } = req.query;
