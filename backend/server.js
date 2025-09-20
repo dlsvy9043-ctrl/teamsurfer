@@ -1,11 +1,11 @@
 import express from "express";
 import puppeteer from "puppeteer";
-import cors from "cors";   // ✅ 추가
+import cors from "cors";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());   // ✅ 모든 도메인 허용 (Netlify → Vercel 통신 가능)
+app.use(cors());
 
 app.get("/rank", async (req, res) => {
   const { store, keyword } = req.query;
@@ -26,22 +26,24 @@ app.get("/rank", async (req, res) => {
     )}`;
     await page.goto(searchUrl, { waitUntil: "domcontentloaded" });
 
-    // ✅ 플레이스 상호명 가져오기
+    // ✅ 플레이스 상호명 크롤링 (여러 후보 셀렉터 확인)
     const places = await page.$$eval(
-      ".place_section_content .place_bluelink",
+      ".place_section_content .place_bluelink, \
+       .place_section_content .text, \
+       .place_section_content .place_title",
       (elements) => elements.map((el) => el.textContent.trim())
     );
 
     await browser.close();
 
-    // ✅ 문자열 정규화 함수
+    // ✅ 문자열 정규화
     const normalize = (str) =>
       str.toLowerCase().replace(/\s+/g, "").replace(/\[.*?\]/g, "");
 
     const target = normalize(store);
     const normalizedPlaces = places.map(normalize);
 
-    // ✅ 순위 찾기
+    // ✅ 순위 계산
     const rank =
       normalizedPlaces.findIndex(
         (name) => name.includes(target) || target.includes(name)
@@ -50,7 +52,13 @@ app.get("/rank", async (req, res) => {
     if (rank > 0) {
       res.json({ store, keyword, rank });
     } else {
-      res.json({ store, keyword, rank: null, message: "순위 없음" });
+      res.json({
+        store,
+        keyword,
+        rank: null,
+        message: "순위 없음",
+        debug: places, // ✅ 실제 크롤링된 상호명 확인용
+      });
     }
   } catch (err) {
     console.error("크롤링 오류:", err);
