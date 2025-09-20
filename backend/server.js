@@ -1,41 +1,29 @@
 import express from "express";
 import puppeteer from "puppeteer";
-import cors from "cors";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// ✅ CORS 허용 (Netlify 프론트엔드에서 요청 가능하도록)
-app.use(cors());
 
 app.get("/rank", async (req, res) => {
   const { store, keyword } = req.query;
 
   if (!store || !keyword) {
-    return res.status(400).json({ error: "store와 keyword는 필수입니다." });
+    return res.status(400).json({ error: "store와 keyword가 필요합니다." });
   }
 
   try {
     const browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-accelerated-2d-canvas",
-        "--no-first-run",
-        "--no-zygote",
-        "--single-process",
-        "--disable-gpu",
-      ],
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
 
     const page = await browser.newPage();
-    const searchUrl = `https://search.naver.com/search.naver?query=${encodeURIComponent(keyword)}`;
-
+    const searchUrl = `https://search.naver.com/search.naver?sm=tab_hty.top&query=${encodeURIComponent(
+      keyword
+    )}`;
     await page.goto(searchUrl, { waitUntil: "domcontentloaded" });
 
-    // ✅ 네이버 플레이스 영역에서 매장명 가져오기
+    // ✅ 플레이스 상호명 가져오기
     const places = await page.$$eval(
       ".place_section_content .place_bluelink",
       (elements) => elements.map((el) => el.textContent.trim())
@@ -43,8 +31,18 @@ app.get("/rank", async (req, res) => {
 
     await browser.close();
 
-    // ✅ 순위 계산 (index는 0부터 시작 → +1)
-    const rank = places.findIndex((name) => name.includes(store)) + 1;
+    // ✅ 문자열 정규화 함수
+    const normalize = (str) =>
+      str.toLowerCase().replace(/\s+/g, "").replace(/\[.*?\]/g, "");
+
+    const target = normalize(store);
+    const normalizedPlaces = places.map(normalize);
+
+    // ✅ 순위 찾기
+    const rank =
+      normalizedPlaces.findIndex(
+        (name) => name.includes(target) || target.includes(name)
+      ) + 1;
 
     if (rank > 0) {
       res.json({ store, keyword, rank });
