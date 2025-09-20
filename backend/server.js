@@ -23,19 +23,18 @@ app.get("/rank", async (req, res) => {
     )}`;
     await page.goto(searchUrl, { waitUntil: "domcontentloaded" });
 
-    // 광고 제외한 플레이스 정보 가져오기
-    const places = await page.$$eval(".place_app_common .place_bluelink", els =>
-      els.map(el => ({
-        text: el.textContent.trim(),
-      }))
+    // 플레이스 상호명 가져오기 (광고 제외)
+    const places = await page.$$eval(
+      ".place_section_content .place_bluelink",
+      els => els.map(el => el.textContent.trim())
     );
 
     await browser.close();
 
-    // 매장명 포함 여부로 순위 검색 (띄어쓰기 무시)
+    // 공백 제거 후 비교 (포함 여부)
     const normalizedStore = store.replace(/\s+/g, "");
-    const index = places.findIndex(place =>
-      place.text.replace(/\s+/g, "").includes(normalizedStore)
+    const index = places.findIndex(text =>
+      text.replace(/\s+/g, "").includes(normalizedStore)
     );
 
     if (index !== -1) {
