@@ -3,7 +3,7 @@ import cors from "cors";
 import puppeteer from "puppeteer";
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
