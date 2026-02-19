@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TEAMSURFER CORP - 로그인</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="orb orb-left"></div>
+  <div class="orb orb-right"></div>
+
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">BRANDING AGENCY</p>
+      <h1>TEAMSURFER CORP</h1>
+      <p class="lead">SINCE 2023 </p>
+      <p class="credit hidden" id="backendStatus" aria-hidden="true"></p>
+    </header>
+
+    <section class="card" id="authShell">
+      <div class="toggle-wrap" role="tablist" aria-label="인증 모드 선택">
+        <button id="tabLogin" class="tab active" type="button" data-tab="login" role="tab" aria-selected="true">로그인</button>
+        <button id="tabSignup" class="tab" type="button" data-tab="signup" role="tab" aria-selected="false">회원가입</button>
+      </div>
+
+      <form id="loginForm" class="panel" data-panel="login" autocomplete="off">
+        <label for="loginName">이름</label>
+        <input id="loginName" name="loginName" type="text" placeholder="관리자/직원 이름을 입력" required />
+        <button type="submit" class="btn btn-primary">로그인</button>
+        <p class="helper">
+          일반 직원은 가입 승인 후 이름으로 로그인할 수 있습니다. 승인되지 않은 사용자는 자동으로 승인 대기 화면으로 이동합니다.
+        </p>
+        <p class="credit">MADE BY HONGINPYO</p>
+        <div id="loginAlert" class="alert" role="status" aria-live="polite"></div>
+      </form>
+
+      <form id="signupForm" class="panel hidden" data-panel="signup" autocomplete="off">
+        <label for="signupName">이름</label>
+        <input id="signupName" name="signupName" type="text" placeholder="실명으로 입력" required />
+
+        <label for="signupPhone">전화번호</label>
+        <input id="signupPhone" name="signupPhone" type="tel" inputmode="numeric" placeholder="010-0000-0000" required />
+
+        <button type="submit" class="btn btn-primary">회원가입 요청</button>
+        <p class="helper">가입 후 관리자의 승인 처리 후 로그인이 가능합니다.</p>
+        <p class="credit">MADE BY HONGINPYO</p>
+        <div id="signupAlert" class="alert" role="status" aria-live="polite"></div>
+      </form>
+    </section>
+
+    <section class="card hidden" id="approvalShell" aria-live="polite">
+      <h2 class="status-title">가입 승인 상태</h2>
+      <p id="approvalStatus" class="status-message">승인 대기중입니다.</p>
+      <p id="approvalName" class="status-sub">입력한 이름: -</p>
+      <div class="status-actions">
+        <button id="backToAuth" type="button" class="btn btn-secondary">로그인/회원가입으로 돌아가기</button>
+      </div>
+      <p class="credit centered">MADE BY HONGINPYO</p>
+    </section>
+
+    <section class="card hidden" id="adminShell" aria-live="polite">
+      <div class="admin-header">
+        <h2 class="status-title">관리자 승인 페이지</h2>
+        <p class="admin-subtitle">승인 대기 목록을 관리하세요.</p>
+      </div>
+      <div id="adminUserList" class="admin-list"></div>
+      <div class="status-actions">
+        <button id="adminRefresh" type="button" class="btn btn-secondary">목록 새로고침</button>
+        <button id="adminLogout" type="button" class="btn btn-ghost">로그아웃</button>
+      </div>
+      <p class="credit centered">MADE BY HONGINPYO</p>
+      <p id="adminAlert" class="alert" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="card hidden" id="storeShell" aria-live="polite">
+      <div class="status-header">
+        <h2 class="status-title">매장 선택</h2>
+        <p class="status-sub">운영중인 5개 매장을 선택하세요.</p>
+      </div>
+
+      <div class="overview-actions">
+        <button id="storeActionRank" type="button" class="btn btn-secondary">플레이스 순위체크</button>
+        <button id="storeActionWork" type="button" class="btn btn-secondary">업무관리 기능</button>
+        <button id="storeActionCheckin" type="button" class="btn btn-secondary">출퇴근기록</button>
+        <button id="storeActionSchedule" type="button" class="btn btn-secondary">업무일정표</button>
+      </div>
+
+      <div id="storeList" class="store-list"></div>
+
+      <div class="status-actions">
+        <button id="storeLogout" type="button" class="btn btn-ghost">로그아웃</button>
+      </div>
+      <p class="credit centered">MADE BY HONGINPYO</p>
+    </section>
+
+    <section class="card hidden" id="storeFunctionShell" aria-live="polite">
+      <div class="status-header">
+        <h2 id="storeFunctionTitle" class="status-title">매장 기능</h2>
+        <p id="storeFunctionMeta" class="status-sub">선택한 매장에 맞는 기능으로 이동합니다.</p>
+      </div>
+
+      <div id="featureGrid" class="feature-grid"></div>
+
+      <div class="status-actions">
+        <button id="toStoreList" type="button" class="btn btn-secondary">매장으로 돌아가기</button>
+      </div>
+      <p class="credit centered">MADE BY HONGINPYO</p>
+    </section>
+
+    <section class="card hidden" id="storeFeatureDetailShell" aria-live="polite">
+      <div class="status-header">
+        <h2 id="detailTitle" class="status-title">기능 상세</h2>
+        <p id="detailMeta" class="status-sub">기능별 페이지 준비 중</p>
+      </div>
+      <div id="detailBody" class="feature-detail"></div>
+      <div class="status-actions">
+        <button id="backToFunctions" type="button" class="btn btn-secondary">기능 목록으로</button>
+        <button id="backToStoreList" type="button" class="btn btn-ghost">매장 선택으로</button>
+      </div>
+      <p class="credit centered">MADE BY HONGINPYO</p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
